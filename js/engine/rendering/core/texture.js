@@ -42,7 +42,7 @@ function loadTexture(gl, texturePath)
     const max = gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
 
         gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, max);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
@@ -182,6 +182,38 @@ function updateVolumeTexture(gl, texture, data, size)
 }
 
 function createDepthTexture (gl, width, height)
+{
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    const level = 0;
+    const internalFormat = gl.DEPTH_COMPONENT32F; // replace WPB?
+    const border = 0;
+    const format = gl.DEPTH_COMPONENT;
+    const type = gl.FLOAT;
+    const data = null;
+
+    gl.texImage2D(
+        gl.TEXTURE_2D, 
+        level, 
+        internalFormat,
+        width, 
+        height, 
+        border,
+        format, 
+        type, 
+        data);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+     
+    return texture;
+}
+
+function createShadowTexture (gl, width, height)
 {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);

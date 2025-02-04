@@ -25,10 +25,6 @@ class DeferredBasePass extends BasePass
                 this.outputID,
                 this.depth
             ])
-
-        this.idFramebuffer = createFramebuffer(this.gl, 
-            [ this.gl.COLOR_ATTACHMENT0 ], 
-            [ this.outputID ])
     }
 
     Render(renderer, scene, view, toScreen)
@@ -56,24 +52,42 @@ class DeferredBasePass extends BasePass
         this.gl.enable(this.gl.CULL_FACE)
         this.gl.cullFace(this.gl.BACK);
 
-        scene.traverse((object) => 
-        {
-            let component = object.renderComponent
-            if (component && component.visible)
-            {
-                this.gl.useProgram       (component.material.BasePassShaderProgram);
-                this.gl.uniformMatrix4fv (component.material.BasePassUniforms.get("proj").location, false, view.projection)
-                this.gl.uniformMatrix4fv (component.material.BasePassUniforms.get("view").location, false, view.worldToView)
-                this.gl.uniform4fv       (component.material.BasePassUniforms.get("CameraPosition").location, [view.position[0], view.position[1], view.position[2], 1.0])            
-                this.gl.uniform1i        (component.material.BasePassUniforms.get("ID").location, object.id)
-                this.gl.uniform4fv       (component.material.BasePassUniforms.get("Albedo").location, component.material.albedo)
-                this.gl.uniform1f        (component.material.BasePassUniforms.get("Time").location, renderer.frameID)
-                this.gl.uniform4fv       (component.material.BasePassUniforms.get("Lighting").location, component.material.lighting)
-                this.gl.uniformMatrix4fv (component.material.BasePassUniforms.get("transform").location, false, object.getTransformMatrix())
-                this.gl.uniform3fv       (component.material.BasePassUniforms.get("scale").location, object.root.transform.scale)
+        const batches = scene.batchMeshes(
+            (object) => { return !object.editor && object.visible },
+            (component) => { return component.visible })
 
+        for (let [batch, components] of batches) 
+        {
+            const material = renderer.MaterialPool.get(components[0].material)
+            const geometry = renderer.GeometryPool.get(components[0].geometry)
+
+            if (material instanceof OpaqueMaterial)
+            {
+                this.gl.useProgram       (material.BasePassShaderProgram);
+
+                for (const [name, uniform] of material.BasePassUniforms.entries())
+                {
+                    if (uniform instanceof UniformFloat)
+                    {
+                        this.gl.uniform1f(uniform.location, uniform.value);
+                    }
+
+                    if (uniform instanceof UniformVec3)
+                    {
+                        this.gl.uniform3fv(uniform.location, uniform.value);
+                    }
+                }
+    
+                this.gl.uniformMatrix4fv (material.BasePassUniforms.get("proj").location, false, view.projection)
+                this.gl.uniformMatrix4fv (material.BasePassUniforms.get("view").location, false, view.worldToView)
+                this.gl.uniform4fv       (material.BasePassUniforms.get("CameraPosition").location, [view.position[0], view.position[1], view.position[2], 1.0])            
+    
+                this.gl.uniform1f        (material.BasePassUniforms.get("Time").location, renderer.frameID)
+                this.gl.uniform4fv       (material.BasePassUniforms.get("Albedo").location, material.albedo)
+                this.gl.uniform4fv       (material.BasePassUniforms.get("Lighting").location, material.lighting)
+    
                 var u = 0
-                for (const [name, uniform] of component.material.BasePassUniforms.entries())
+                for (const [name, uniform] of material.BasePassUniforms.entries())
                 {
                     if (uniform.type == "sampler2D")
                     {
@@ -87,10 +101,23 @@ class DeferredBasePass extends BasePass
                         ++u
                     }
                 }
-
-                renderer.GeometryPool[component.geometry].draw()
+    
+                const id = []
+                const transform = []
+                const scale = []
+                for (var i = 0; i < components.length; ++i)
+                {
+                    id.push(components[i].id)
+                    transform.push(...components[i].transform.matrix())
+                    scale.push(...components[i].transform.getWorldScale())
+                }
+                this.gl.uniform1iv       (material.BasePassUniforms.get("ID").location, id)
+                this.gl.uniformMatrix4fv (material.BasePassUniforms.get("transform").location, false, transform)
+                this.gl.uniform3fv       (material.BasePassUniforms.get("scale").location, scale)
+                    
+                geometry.draw(components.length)
             }
-        })
+        }
 
         this.gl.disable(this.gl.DEPTH_TEST)
         this.gl.disable(this.gl.CULL_FACE)

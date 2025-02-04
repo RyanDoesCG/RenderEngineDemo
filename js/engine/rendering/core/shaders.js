@@ -60,21 +60,33 @@ function extractUniforms(gl, vertexSource, fragmentSource)
                 const type = words[token + 1]
                 const exposed = words.includes("#expose")
                 const texture = words.includes("#texture")
-                if (type == "float" && exposed)
+                if (type == "float")
                 {
-                    const min = words
-                        .filter(v => v.includes("min"))[0]
-                        .split("=")[1]
-                    const max = words
-                        .filter(v => v.includes('max'))[0]
-                        .split('=')[1]
-                    const step = words
-                        .filter(v => v.includes('step'))[0]
-                        .split('=')[1]
-                    const value = words
-                        .filter(v => v.includes('default'))[0]
-                        .split('=')[1]
-                    uniforms.set(name, new UniformFloat(name, type, null, exposed, min, max, step, value))
+                    if (exposed)
+                    {
+                        const min = words
+                            .filter(v => v.includes("min"))[0]
+                            .split("=")[1]
+                        const max = words
+                            .filter(v => v.includes('max'))[0]
+                            .split('=')[1]
+                        const step = words
+                            .filter(v => v.includes('step'))[0]
+                            .split('=')[1]
+                        const value = words
+                            .filter(v => v.includes('default'))[0]
+                            .split('=')[1]
+                        uniforms.set(name, new UniformFloat(name, type, null, exposed, min, max, step, value))                
+                    }
+                    else
+                    {
+                        uniforms.set(name, new UniformFloat(name, type, null, false, -1000, 1000, 0, 0))
+                    } 
+                }
+                else
+                if (type == "vec3")
+                {
+                    uniforms.set(name, new UniformVec3(name, type, null, false))
                 }
                 else
                 if (texture)
@@ -121,4 +133,24 @@ function getTextureEnum(gl, i)
     if (i == 13) return gl.TEXTURE13
     if (i == 14) return gl.TEXTURE14
     if (i == 15) return gl.TEXTURE15
+}
+
+function getTextureEnumString(gl, i)
+{
+    if (i == gl.TEXTURE0) return "TEXTURE0"
+    if (i == gl.TEXTURE1) return "TEXTURE1"
+    if (i == gl.TEXTURE2) return "TEXTURE2"
+    if (i == gl.TEXTURE3) return "TEXTURE3"
+    if (i == gl.TEXTURE4) return "TEXTURE4"
+    if (i == gl.TEXTURE5) return "TEXTURE5"
+    if (i == gl.TEXTURE6) return "TEXTURE6"
+    if (i == gl.TEXTURE7) return "TEXTURE7"
+    if (i == gl.TEXTURE8) return "TEXTURE8"
+    if (i == gl.TEXTURE9) return "TEXTURE9"
+    if (i == gl.TEXTURE10) return "TEXTURE10"
+    if (i == gl.TEXTURE11) return "TEXTURE11"
+    if (i == gl.TEXTURE12) return "TEXTURE12"
+    if (i == gl.TEXTURE13) return "TEXTURE13"
+    if (i == gl.TEXTURE14) return "TEXTURE14"
+    if (i == gl.TEXTURE15) return "TEXTURE15"
 }

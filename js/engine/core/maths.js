@@ -68,15 +68,6 @@ function multiplyv(lhs, rhs)
     return R; 
 }
 
-function multiplyv3D(lhs, rhs)
-{
-    var N = 3
-    var R = []
-    for (var i = 0; i < N; ++i)
-        R.push(lhs[i] * rhs[i])
-    return R; 
-}
-
 function divides (lhs, rhs) 
 { 
     var N = lhs.length
@@ -97,7 +88,10 @@ function dividev (lhs, rhs)
 
 function cross (lhs, rhs)
 { 
-    return vec4(lhs[1] * rhs[2] - lhs[2] * rhs[1], lhs[2] * rhs[0] - lhs[0] * rhs[2], lhs[0] * rhs[1] - lhs[1] * rhs[0]) 
+    return [
+        lhs[1] * rhs[2] - lhs[2] * rhs[1], 
+        lhs[2] * rhs[0] - lhs[0] * rhs[2], 
+        lhs[0] * rhs[1] - lhs[1] * rhs[0]] 
 }
 
 function len (v)
@@ -113,6 +107,16 @@ function normalize (v)
 function lerpv (a, b, t)
 {
     return addv(a, multiplys(subv(b, a), t))
+}
+
+function lerp (a, b, t)
+{
+    return (1.0 - t) * a + t * b
+}
+
+function clamp (t, a, b)
+{
+    return Math.max(Math.min(t, b), a)
 }
 
 function reflect(i, n)
@@ -224,7 +228,7 @@ function multiplym (lhs, rhs)
         dot(row0, column3), dot(row1, column3), dot(row2, column3), dot(row3, column3)])
 }
 
-function multiplyv(lhs, rhs)
+function multiplyvm(lhs, rhs)
 {
     let row0    = new Float32Array([rhs[0], rhs[4], rhs[8],  rhs[12]])
     let row1    = new Float32Array([rhs[1], rhs[5], rhs[9],  rhs[13]])
@@ -366,20 +370,20 @@ function halfPlaneTest(plane, p, s)
 
 function deg2rad (deg)
 {
-   return deg * (180.0/Math.PI)
+   return deg * (Math.PI/180.0)
 }
 
 function rad2deg (rad)
 {
-    return rad * (Math.PI/180.0)
+    return rad * (180.0/Math.PI)
 }
 
 class RunningAverage
 {
-    constructor ()
+    constructor (max = 256)
     {
         this.values = []
-        this.max = 256
+        this.max = max
     }
 
     add (v)
@@ -402,4 +406,44 @@ class RunningAverage
 
         return avg / this.values.length
     }
+}
+
+function lookAt(from, to)
+{
+    const forward = normalize(subv(from, to))
+    const right = cross(forward, vec3(0.0, 1.0, 0.0))
+    const up = cross(forward, right)
+
+    const transX = dot(from, right)
+    const transY = dot(from, up)
+    const transZ = dot(from, forward)
+
+    return matrix(
+        rightVector  [0], rightVector  [1], rightVector  [2], -translationX,
+        upVector     [0], upVector     [1], upVector     [2], -translationY,
+        forwardVector[0], forwardVector[1], forwardVector[2], -translationZ,
+        0.0             ,  0.0            , 0.0             ,   1.0
+    )
+}
+
+function quaternion (x, y, z, th) 
+{ 
+    const mag = Math.sqrt(Math.pow(x, 2.0) + Math.pow(y, 2.0) + Math.pow(z, 2.0))
+    const nx = x / mag
+    const ny = y / mag
+    const nz = z / mag
+
+    let q = vec4(
+        Math.sin(th / 2.0) * nx, 
+        Math.sin(th / 2.0) * ny, 
+        Math.sin(th / 2.0) * nz, 
+        th 
+    )
+
+    return matrix(
+		1.0 - 2.0  * q[1] * q[1] - 2.0  * q[2] * q[2], 2.0 * q[0] * q[1] - 2.0 * q[2] * q.w, 2.0  * q[0] * q[2] + 2.0 * q[1] * q.w, 0.0, 
+		2.0 * q[0] * q[1] + 2.0  * q[2] * q.w, 1.0 - 2.0   * q[0] * q[0] - 2.0 * q[2] * q[2], 2.0 * q[1] * q[2] - 2.0 * q[0] * q.w, 0.0, 
+		2.0 * q[0] * q[2] - 2.0  * q[1] * q.w, 2.0 * q[1]  * q[2] + 2.0 * q[0] * q.w, 1.0 - 2.0   * q[0] * q[0] - 2.0 * q[1] * q[1], 0.0, 
+		0.0, 0.0, 0.0, 1.0
+    )
 }

@@ -17,3 +17,17 @@ function writeValueToCookie(key, value)
 {
     document.cookie = key + "=" + value
 }
+
+function cookieContains(key)
+{
+    var CookieRecord = document.cookie;
+    var IndividualCookies = CookieRecord.split(' ');
+    for (var i = 0; i < IndividualCookies.length; ++i)
+    {
+        if (IndividualCookies[i].includes(key))
+        {
+            return true
+        }
+    }
+    return false
+}

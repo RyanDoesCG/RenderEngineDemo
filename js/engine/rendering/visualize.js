@@ -25,13 +25,13 @@ class VisualizationPass extends RenderPass
 
             void main ()
             {
-                out_colour.rgb = texture(Scene, frag_uvs).rgb;
+                out_colour.rgb = texture(Scene, frag_uvs).xyz;
                 out_colour.a = 1.0;
             }`
         super(context, width, height, VertexSource, FragmentSource)
     }
 
-    Render(renderer, ScreenPrimitive, inSceneTexture)
+    Render(renderer, inSceneTexture)
     {
         this.gl.viewport(0, 0, this.width, this.height);
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
@@ -42,6 +42,6 @@ class VisualizationPass extends RenderPass
         this.gl.bindTexture(this.gl.TEXTURE_2D, inSceneTexture);
         this.gl.uniform1i(this.uniforms.get("Scene").location, 0);
 
-        renderer.GeometryPool[ScreenPrimitive.geometry].draw()
+renderer.screenPass()
     }
 }

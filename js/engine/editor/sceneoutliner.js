@@ -1,59 +1,60 @@
 class SceneOutliner
 {
-    constructor(engine, scene)
+    constructor(engine)
     {
         this.engine = engine
-        this.scene = scene
 
-        this.generateHTML()
-        this.attachHandlers()
-
-        this.selected = null
+        this.needsUpdate = false
+        this.scrollTo = false
     }
 
     generateHTML()
     {
         var HTML = ""
 
-        HTML += "<div class=\"tabHeader\"><img src=\"images\\icons\\so.png\" alt=\"\"><h2>World Outliner</h2></div>"
-    
-        for (var i = 0; i < this.scene.objects.length; ++i)
+        //HTML += "<div class=\"tabHeader\"><img width=30px height=30px src=\"images\\icons\\so.png\" alt=\"\"><h2>World Outliner</h2></div>"
+        HTML += "<div class=\"tabHeader\"><h2>World Outliner</h2></div>"
+        
+        for (var i = 0; i < this.engine.scene.objects.length; ++i)
         {
-            if (this.scene.objects[i].editor)
+            if (this.engine.scene.objects[i].editor)
             {
                 continue
             }
 
-            if (this.scene.objects[i] == this.selected)
-                HTML += "<p id=\"" + this.scene.objects[i].id + "\" class=\"sceneEntitySelected\">"
+            if (this.engine.scene.objects[i] == this.engine.editor.selected)
+            {
+                HTML += "<p id=\"" + this.engine.scene.objects[i].id + "\" class=\"sceneEntitySelected\">"
+            }
             else
-                HTML += "<p id=\"" + this.scene.objects[i].id + "\" class=\"sceneEntity\">"
-            HTML += this.scene.objects[i].name
+            {
+                HTML += "<p id=\"" + this.engine.scene.objects[i].id + "\" class=\"sceneEntity\">"
+            }
+
+            HTML += this.engine.scene.objects[i].name
             HTML += "</p>"
 
-            for (var j = 0; j < this.scene.objects[i].root.children.length; ++j)
+            for (var j = 0; j < this.engine.scene.objects[i].components.length; ++j)
             {
                 HTML += "<p class=\"sceneComponent\">"
                 HTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-                HTML += this.scene.objects[i].root.children[j].type
+                HTML += this.engine.scene.objects[i].components[j].type
                 HTML += "</p>"
             }
         }
 
         document.getElementById('outliner').innerHTML = HTML
-
     }
 
     attachHandlers()
-    {
+    {   
         var entities = document.getElementsByClassName('sceneEntity')
         for (var i = 0; i < entities.length; ++i)
         {
             entities[i].addEventListener('click', (e) =>
             {
-                this.engine.events.add(new Event(
-                    e.target.id,
-                    EVENT_TYPE_OBJECT_SELECTION))
+                this.engine.editor.selected = this.engine.scene.get(e.target.id)
+                this.engine.editor.updateAllPanels = true
             })
         }
 
@@ -62,25 +63,42 @@ class SceneOutliner
         {
             entities[i].addEventListener('click', (e) =>
             {
-                this.engine.events.add(new Event(
-                    e.target.id,
-                    EVENT_TYPE_OBJECT_DESELECTION))
+                this.engine.editor.selected = null
+                this.engine.editor.updateAllPanels = true
             })
+        }
+    }
+
+    scrollToSelected()
+    {
+        // scroll to selected object
+        for (var i = 0; i < this.engine.scene.objects.length; ++i)
+        {
+            if (this.engine.scene.objects[i] == this.engine.editor.selected)
+            {
+                var element = document.getElementById(this.engine.scene.objects[i].id);
+                if (element)
+                {
+                    var top = element.offsetTop;
+                    document.getElementById('outliner').scrollTop = top - 50;
+                }
+            }
         }
     }
 
     update ()
     {
-        const lastSelectionEvent = this.engine.events.findType(EVENT_TYPE_OBJECT_SELECTION)
-        if (lastSelectionEvent != null)
+        if (this.needsUpdate)
         {
-            const object = this.scene.get(lastSelectionEvent.objectID)
-            if (object != this.selected)
+            this.generateHTML()
+            this.attachHandlers()
+            if (this.scrollTo)
             {
-                this.selected = object
-                this.generateHTML()
-                this.attachHandlers()
+                this.scrollToSelected()
+                this.scrollTo = false
             }
+
+            this.needsUpdate = false
         }
     }
 }

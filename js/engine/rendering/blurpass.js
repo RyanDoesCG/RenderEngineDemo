@@ -59,7 +59,7 @@ class BlurPass extends SubPass
         this.outputFramebuffer = createFramebuffer(this.gl, [this.gl.COLOR_ATTACHMENT0], [ this.output ])
     }
 
-    Render(renderer, ScreenPrimitive, inTexture, amount)
+    Render(renderer, inTexture, amount)
     {
 
         this.gl.viewport(0, 0, this.width, this.height);
@@ -78,7 +78,7 @@ class BlurPass extends SubPass
         this.gl.uniform1f(this.uniforms.get("OffsetScale").location, amount);
         this.gl.uniform1i(this.uniforms.get("Horizontal").location, 0);
 
-        renderer.GeometryPool[ScreenPrimitive.geometry].draw()
+        renderer.GeometryPool.get(ScreenPrimitive.geometry).draw()
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.outputFramebuffer);
 
@@ -92,6 +92,6 @@ class BlurPass extends SubPass
         this.gl.uniform1f(this.uniforms.get("OffsetScale").location, amount);
         this.gl.uniform1i(this.uniforms.get("Horizontal").location, 1);
 
-        renderer.GeometryPool[ScreenPrimitive.geometry].draw()
+renderer.screenPass()
     }
 }

@@ -1,13 +1,8 @@
-const EVENT_TYPE_MOUSE_HOVER = 0
-const EVENT_TYPE_MOUSE_CLICK = 1
-
-const EVENT_TYPE_OBJECT_SELECTION   = 2
-const EVENT_TYPE_OBJECT_DESELECTION = 3
+const EVENT_TYPE_OBJECT_SELECTION   = 0
+const EVENT_TYPE_OBJECT_DESELECTION = 1
 
 function getEventTypeString(e)
 {
-    if (e == EVENT_TYPE_MOUSE_HOVER) return "Mouse Hover"
-    if (e == EVENT_TYPE_MOUSE_CLICK) return "Mouse Click"
     if (e == EVENT_TYPE_OBJECT_SELECTION) return "Object Selected"
     if (e == EVENT_TYPE_OBJECT_DESELECTION) return "Object Deselected"
 
@@ -33,13 +28,11 @@ class EventQueue
 
     add (event)
     {
-        log(getEventTypeString(event.typeID) + " on object " + event.objectID)
         this.events.push(event)
     }
 
     addUnique (event)
     {
-       // log(getEventTypeString(event.typeID) + " on object " + event.objectID)
         for (var i = 0; i < this.events.length; ++i)
         {
             if (this.events[i].typeID == event.typeID)

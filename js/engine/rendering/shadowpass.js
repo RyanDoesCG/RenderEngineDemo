@@ -4,11 +4,11 @@ class ShadowPass extends BasePass
     {
         super(context, width, height)
 
-        this.output = createDepthTexture(this.gl, this.width, this.height)
+        this.output = createShadowTexture(this.gl, this.width, this.height)
         this.framebuffer = createFramebuffer(this.gl, [ this.gl.DEPTH_ATTACHMENT ], [ this.output ])
     }
 
-    Render(renderer, scene)
+    Render(renderer, scene, light)
     {
         this.gl.viewport(0, 0, this.width, this.height);
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
@@ -17,30 +17,52 @@ class ShadowPass extends BasePass
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
         this.gl.enable(this.gl.DEPTH_TEST)
-        this.gl.enable(this.gl.CULL_FACE)
-        this.gl.cullFace(this.gl.FRONT)
+      //  this.gl.enable(this.gl.CULL_FACE)
+      //  this.gl.cullFace(this.gl.FRONT)
 
-        scene.traverse((object) => 
+        const batches = scene.batchMeshes(
+            (object) => { return !object.editor && object.visible },
+            (component) => { return component.visible && component.shadows })
+            
+        for (let [batch, components] of batches) 
         {
-            let component = object.renderComponent
-            if (component && component.visible && component.shadows)
+            const material = renderer.MaterialPool.get(components[0].material)
+            const geometry = renderer.GeometryPool.get(components[0].geometry)
+
+            if (material instanceof OpaqueMaterial)
             {
-                this.gl.useProgram       (component.material.ShadowPassShaderProgram);
-                this.gl.uniform1f        (component.material.ShadowPassUniforms.get("Time").location, renderer.frameID)
-                this.gl.uniform1i        (component.material.ShadowPassUniforms.get("ID").location, object.id)
-                this.gl.uniformMatrix4fv (component.material.ShadowPassUniforms.get("Transform").location, false, object.getTransformMatrix())
-                const directionalLight = scene.getDirectionalLight()
-                if (directionalLight)
+                this.gl.useProgram       (material.ShadowPassShaderProgram);
+
+                for (const [name, uniform] of material.ShadowPassUniforms.entries())
                 {
-                    this.gl.uniformMatrix4fv(component.material.ShadowPassUniforms.get("Projection").location, false, directionalLight.projection)
-                    this.gl.uniformMatrix4fv(component.material.ShadowPassUniforms.get("View").location, false, directionalLight.view.worldToView)
+                    if (uniform instanceof UniformFloat)
+                    {
+                      //  log("uniform " + name + " = " + uniform.value)
+                        this.gl.uniform1f(uniform.location, uniform.value);
+                    }
                 }
-                renderer.GeometryPool[component.geometry].draw()
+    
+                this.gl.uniform1f        (material.ShadowPassUniforms.get("Time").location, renderer.frameID)
+                this.gl.uniformMatrix4fv (material.ShadowPassUniforms.get("Projection").location, false, light.projection)
+                this.gl.uniformMatrix4fv (material.ShadowPassUniforms.get("View").location, false, light.view.worldToView)
+    
+                const id = []
+                const transform = []
+                const scale = []
+                for (var i = 0; i < components.length; ++i)
+                {
+                    id.push(components[i].id)
+                    transform.push(...components[i].transform.matrix())
+                }
+                this.gl.uniform1iv       (material.ShadowPassUniforms.get("ID").location, id)
+                this.gl.uniformMatrix4fv (material.ShadowPassUniforms.get("transform").location, false, transform)
+                    
+                geometry.draw(components.length)
             }
-        })
+        }
 
         this.gl.disable(this.gl.DEPTH_TEST)
-        this.gl.disable(this.gl.CULL_FACE)
+       // this.gl.disable(this.gl.CULL_FACE)
     }
 
     Clear ()

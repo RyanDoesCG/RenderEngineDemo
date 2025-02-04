@@ -27,10 +27,10 @@ class Geometry
         this.gl.enableVertexAttribArray(2);
     }
 
-    draw ()
+    draw (instances = 1)
     {
         this.gl.bindVertexArray(this.VertexArrayObject);
-        this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.mesh.positions.length / 3, 1);   
+        this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.mesh.positions.length / 3, instances);   
     }
 }
 
@@ -110,6 +110,7 @@ function objToMesh (t)
     // center and floor the mesh
     var centroid = [ 0.0, 0.0, 0.0 ]
     var lowestY = 100000.0
+    /*
     for (var i = 0; i < positions.length; i += 3)
     {
         centroid[0] += positions[i + 0];
@@ -133,6 +134,7 @@ function objToMesh (t)
         positions[i + 1] -= lowestY;
         positions[i + 2] -= centroid[2];
     }
+    */
 
     // compute extents
     var extents = [0,0,0]
@@ -486,14 +488,14 @@ let CylinderMesh = function ()
     for (var i = 1; i < circlePoints.length; i++)
     {
         var A = [...circlePoints[i]]
-        A[1] = 4.0;
+        A[1] = 2.0;
         var B = [...circlePoints[i - 1]]
-        B[1] = 4.0;
+        B[1] = 2.0;
 
         cylinderGeometryPositions.push(
             ...A,
             ...B,
-            0.0, 4.0, 0.0)
+            0.0, 2.0, 0.0)
         cylinderGeometryNormals.push(
             0.0, 1.0, 0.0,
             0.0, 1.0, 0.0,
@@ -507,14 +509,14 @@ let CylinderMesh = function ()
     for (var i = 1; i < circlePoints.length; i++)
     {
         var A = [...circlePoints[i]]
-        A[1] = 0.0;
+        A[1] = -2.0;
         var B = [...circlePoints[i - 1]]
-        B[1] = 0.0;
+        B[1] = -2.0;
 
         cylinderGeometryPositions.push(
             ...B,
             ...A,
-            0.0, 0.0, 0.0)
+            0.0, -2.0, 0.0)
         cylinderGeometryNormals.push(
             0.0, -1.0, 0.0,
             0.0, -1.0, 0.0,
@@ -528,14 +530,14 @@ let CylinderMesh = function ()
     for (var i = 1; i < circlePoints.length; i++)
     {
         var topA = [...circlePoints[i]]
-        topA[1] = 4.0;
+        topA[1] = 2.0;
         var topB = [...circlePoints[i - 1]]
-        topB[1] = 4.0;
+        topB[1] = 2.0;
 
         var bottomA = [...circlePoints[i]]
-        bottomA[1] = 0.0;
+        bottomA[1] = -2.0;
         var bottomB = [...circlePoints[i - 1]]
-        bottomB[1] = 0.0;
+        bottomB[1] = -2.0;
 
         cylinderGeometryPositions.push(
             ...topB,
@@ -1173,3 +1175,358 @@ let ArrowMesh = (function () {
     )
 }())
 
+let ScalerMesh = (function () {
+    var ScalerGeometryPositions = []
+    var ScalerGeometryNormals = []
+    var ScalerGeometryUVs = []
+
+    var circlePoints = []
+    var N = 64
+    var step = 360.0 / N
+    for (var i = 0; i <= 360.0; i += step)
+    {
+        var x = Math.cos(i * Math.PI/180) * 0.05
+        var y = 0.0
+        var z = Math.sin(i * Math.PI/180) * 0.05
+        circlePoints.push([ x, y, z ])
+    }
+
+    for (var i = 1; i < circlePoints.length; i++)
+    {
+        var A = [...circlePoints[i]]
+        A[1] = 0.0;
+        var B = [...circlePoints[i - 1]]
+        B[1] = 0.0;
+
+        ScalerGeometryPositions.push(
+            ...B,
+            ...A,
+            0.0, 0.0, 0.0)
+        ScalerGeometryNormals.push(
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0)
+        ScalerGeometryUVs.push(
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5)
+    }
+
+    // Walls
+    for (var i = 1; i < circlePoints.length; i++)
+    {
+        var topA = [...circlePoints[i]]
+        topA[1] = 3.0;
+        var topB = [...circlePoints[i - 1]]
+        topB[1] = 3.0;
+
+        var bottomA = [...circlePoints[i]]
+        bottomA[1] = 0.0;
+        var bottomB = [...circlePoints[i - 1]]
+        bottomB[1] = 0.0;
+
+        ScalerGeometryPositions.push(
+            ...topB,
+            ...topA, 
+            ...bottomB,
+            ...bottomA,
+            ...bottomB,
+            ...topA)
+
+        ScalerGeometryNormals.push(
+            ...circlePoints[i],
+            ...circlePoints[i],
+            ...circlePoints[i - 1],
+
+            ...circlePoints[i - 1],
+            ...circlePoints[i - 1],
+            ...circlePoints[i])
+            
+        ScalerGeometryUVs.push(
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5)
+    }
+
+    let boxpos = [...BoxMesh.positions]
+    let boxnorm = [...BoxMesh.normals]
+    let boxuvs = [...BoxMesh.uvs]
+
+    for (var i = 0; i < boxpos.length; i += 3)
+    {
+        boxpos[i + 0] *= 0.1
+        boxpos[i + 1] *= 0.25
+        boxpos[i + 2] *= 0.1
+
+        boxpos[i + 1] += 3
+    }
+
+    ScalerGeometryPositions.push(
+        ...boxpos)
+
+    ScalerGeometryNormals.push(
+        ...boxnorm)
+        
+    ScalerGeometryUVs.push(
+        ...boxuvs)
+
+    /*
+    for (var i = 1; i < circlePoints.length; i++)
+    {
+        var topA = [...circlePoints[i]]
+        topA[0] *= 2.5
+        topA[1] = 3.0;
+        topA[2] *= 2.5
+        var topB = [...circlePoints[i - 1]]
+        topB[0] *= 2.5
+        topB[1] = 3.0;
+        topB[2] *= 2.5
+
+        var bottomA = [...circlePoints[i]]
+        bottomA[1] = 3.0;
+        var bottomB = [...circlePoints[i - 1]]
+        bottomB[1] = 3.0;
+
+        ScalerGeometryPositions.push(
+            ...topB,
+            ...topA, 
+            ...bottomB,
+            ...bottomA,
+            ...bottomB,
+            ...topA)
+
+        ScalerGeometryNormals.push(
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0)
+            
+        ScalerGeometryUVs.push(
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5)
+    }
+
+
+    var topPoint = [ 0.0, 4.0, 0.0 ]
+    for (var i = 1; i < circlePoints.length; i++)
+    {
+        var bottomA = [...circlePoints[i]]
+        bottomA[0] *= 2.5
+        bottomA[1] = 3.0;
+        bottomA[2] *= 2.5
+        var bottomB = [...circlePoints[i - 1]]
+        bottomB[0] *= 2.5
+        bottomB[1] = 3.0;
+        bottomB[2] *= 2.5
+
+        ScalerGeometryPositions.push(
+            ...topPoint,
+            ...topPoint, 
+            ...bottomB,
+            ...bottomA,
+            ...bottomB,
+            ...topPoint)
+
+        ScalerGeometryNormals.push(
+            ...circlePoints[i],
+            ...circlePoints[i],
+            ...circlePoints[i - 1],
+
+            ...circlePoints[i - 1],
+            ...circlePoints[i - 1],
+            ...circlePoints[i])
+            
+        ScalerGeometryUVs.push(
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5)
+    }
+    */
+
+    return new Mesh(
+        new Float32Array(ScalerGeometryPositions),
+        new Float32Array(ScalerGeometryNormals),
+        new Float32Array(ScalerGeometryUVs)
+    )
+}())
+
+let RotatorMesh = (function (){
+    var RotatorGeometryPositions = []
+    var RotatorGeometryNormals = []
+    var RotatorGeometryUVs = []
+
+    var circlePoints = []
+    var N = 64
+    var step = 90.0 / N
+    for (var i = 0; i <= 90.0; i += step)
+    {
+        var x = Math.cos(i * Math.PI/180) * 2.0
+        var y = 0.0
+        var z = Math.sin(i * Math.PI/180) * 2.0
+        circlePoints.push([ x, y, z ])
+    }
+
+    for (var i = 1; i < circlePoints.length; i++)
+    {
+        const thickness = 0.925
+        var A = [...circlePoints[i]]
+        var B = [...circlePoints[i - 1]]
+        var C = [B[0] * thickness, B[1] * thickness, B[2] * thickness]
+        var D = [A[0] * thickness, A[1] * thickness, A[2] * thickness]
+
+        RotatorGeometryPositions.push(
+            ...B,
+            ...A,
+            ...C)
+        RotatorGeometryNormals.push(
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0)
+        RotatorGeometryUVs.push(
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5)
+
+        RotatorGeometryPositions.push(
+            ...C,
+            ...D,
+            ...A)
+        RotatorGeometryNormals.push(
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0)
+        RotatorGeometryUVs.push(
+            0.5, 0.5,
+            0.5, 0.5,
+            0.5, 0.5)
+    }
+
+    RotatorGeometryPositions.push(
+            0.0, 0.0, 0.0,  
+            0.05, 0.0, 0.0, 
+            0.05,  0.0, 2.0,
+
+            0.0,  0.0,  2.0,
+            0.0, 0.0, 0.0, 
+            0.05,  0.0, 2.0,
+
+
+            0.0, 0.0, 0.0,  
+            0.0, 0.0, 0.05, 
+            2.0, 0.0,  0.05,
+
+            2.0,  0.0,  0.0,
+            0.0, 0.0, 0.0, 
+            2.0,  0.0, 0.05
+        )
+
+        RotatorGeometryNormals.push(
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0,  
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0,
+
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0,  
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0, 
+            0.0, 0.0, 1.0
+        )
+
+        RotatorGeometryUVs.push(
+            0.0, 0.0, 
+            1.0, 0.0, 
+            1.0, 1.0, 
+            0.0, 1.0, 
+            0.0, 0.0, 
+            1.0, 1.0,
+
+            0.0, 0.0, 
+            1.0, 0.0, 
+            1.0, 1.0, 
+            0.0, 1.0, 
+            0.0, 0.0, 
+            1.0, 1.0
+        )
+
+    return twoside(new Mesh(
+        new Float32Array(RotatorGeometryPositions),
+        new Float32Array(RotatorGeometryNormals),
+        new Float32Array(RotatorGeometryUVs)
+    ))
+}())
+
+let GrassMesh = (function () {
+    let positions = []
+    let normals = []
+    let uvs = []
+
+    for (var i = 0; i < 20000; ++i)
+    {
+        let x = (-1.0 + Math.random() * 2.0) * 1000.0
+        //let y = (-1.0 + Math.random() * 2.0) * 0.2
+    
+        let z = (-1.0 + Math.random() * 2.0) * 1000.0
+
+        let y = noise(x * 0.001, z * 0.001, 0.0)
+        
+
+        let blade = new Mesh(
+            new Float32Array([
+                x + -2.0, 0.0, z,  
+                x +  2.0, 0.0, z, 
+                x +  0.0, 3.3 + y, z ]),
+            new Float32Array([
+                0.0, 0.0, 1.0, 
+                0.0, 0.0, 1.0, 
+                0.0, 0.0, 1.0 ]),
+            new Float32Array([
+                0.0, 0.0, 
+                1.0, 0.0, 
+                0.5, 1.0 ]))
+        positions.push(...blade.positions)
+        normals.push(...blade.normals)
+        uvs.push(...blade.uvs)   
+    }
+
+    log ("Grass Mesh generated with " + positions.length / 3 + " triangles")
+
+    return tesselate(new Mesh(
+        new Float32Array(positions),
+        new Float32Array(normals),
+        new Float32Array(uvs))
+    )
+}())
+
+const EngineMeshes = (function () {
+    const map = new Map()
+    map.set("Quad", QuadMesh)
+    map.set("Box", BoxMesh)
+    map.set("Sphere", SphereMesh)
+    map.set("TessPlane", TesselatedPlaneMesh)
+    map.set("Sky", SkySphereMesh)
+    map.set("Cylinder", CylinderMesh)
+    map.set("Arch", ArchMesh)
+    map.set("Cone", ConeMesh)
+    map.set("Grass", GrassMesh)
+    map.set("Arrow", ArrowMesh)
+    map.set("Scaler", ScalerMesh)
+    map.set("Rotator", RotatorMesh)
+    return map
+}())

@@ -1,29 +1,26 @@
 class ObjectInspector
 {
-    constructor(engine, scene)
+    constructor(engine)
     {
         this.engine = engine
-        this.scene = scene
-        
-        this.generateHTML()
-        this.attachHandlers()
 
-        this.selected = null
+        this.needsUpdate = false
     }
 
     generateHTML()
     {
         var HTML = ""
 
-        HTML += "<div class=\"tabHeader\"><img src=\"images\\icons\\oi.png\" alt=\"\"><h2>Object Inspector</h2></div>"
-    
-        if (this.selected != null)
+        //HTML += "<div class=\"tabHeader\"><img src=\"images\\icons\\oi.png\" alt=\"\"><h2>Object Inspector</h2></div>"
+        HTML += "<div class=\"tabHeader\"><h2>Object Inspector</h2></div>"
+
+        if (this.engine.editor.selected)
         {
-            HTML += "<p>" + this.selected.name + "</p>"
-            HTML += "<p>" + this.selected.root.transform.toString() + "</p>"
-            
-            if (this.selected.renderComponent)
-                HTML += "<p>" + this.selected.renderComponent.toString() + "</p>"
+            HTML += "<p>" + this.engine.editor.selected.name + " " + this.engine.editor.selected.id + "</p>"
+            if (this.engine.editor.selected.transform)
+            {
+                HTML += "<p>" + this.engine.editor.selected.transform.toString() + "</p>"
+            }
         }
 
         document.getElementById('inspector').innerHTML = HTML
@@ -31,45 +28,17 @@ class ObjectInspector
 
     attachHandlers()
     {
-        for (var i = 0; i < this.scene.objects.length; ++i)
-        {
-            let obj = this.scene.objects[i]
-            this.scene.objects[i].onClickStart = () => 
-            {
-                if (this.selected == null)
-                {
-                    this.engine.events.add(new Event(
-                        obj.id,
-                        EVENT_TYPE_OBJECT_SELECTION))
-                }
-                else
-                if (this.selected == obj)
-                {
-                    this.engine.events.add(new Event(
-                        obj.id,
-                        EVENT_TYPE_OBJECT_DESELECTION))
-                }
-                else
-                {
-                    this.engine.events.add(new Event(
-                        obj.id,
-                        EVENT_TYPE_OBJECT_SELECTION))
-                }
-            }
-        }
+
     }
 
     update ()
     {
-        const lastSelectionEvent = this.engine.events.findType(EVENT_TYPE_OBJECT_SELECTION)
-        if (lastSelectionEvent != null)
+        if (this.needsUpdate)
         {
-            const object = this.scene.get(lastSelectionEvent.objectID)
-            if (object != this.selected)
-            {
-                this.selected = object
-                this.generateHTML()
-            }
+            this.generateHTML()
+            this.attachHandlers()
+
+            this.needsUpdate = false
         }
     }
 }

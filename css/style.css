@@ -14,16 +14,28 @@ img {
 }
 
 h2 {
-    font-size: 1em;
+    font-size: 0.8em;
+    line-height: 30px;
     color: #FFFFFF;
     display: inline-block;
     vertical-align: middle;
+    padding-left: 1em;
+}
+
+body::-webkit-scrollbar-track {
+    background: rgb(50, 50, 50);;        /* color of the tracking area */
+  }
+
+.editor {
+    background: #484848;
 }
 
 .tabHeader {
+    height: 30px;
     position: sticky;
-    top:0;
-    background: #1C1C1C;
+    top:0;    
+
+    background: rgb(50, 50, 50);
 }
 
 h3 {
@@ -33,28 +45,21 @@ h3 {
 
 html 
 {
-    background: #323232;
+    background: rgb(50, 50, 50);
     height: 100%;
     width: 100%;
-   overflow: hidden;
+    overflow: hidden;
+    --scrollbarBG: rgb(50, 50, 50);
+    --thumbBG: #90A4AE;
 }
 
 #sidebar 
 {
     width: 30%;
     height: 100%;
-    background: #202020;
     overflow:hidden;
-    float: left;
-}
-
-#sidebarResize
-{
-    width:4px;
-    height:100%;
-    background: #121212;
-    float: left;
-    cursor:grabbing;
+    position: fixed;
+    left: 0;
 }
 
 #inspector {
@@ -62,7 +67,7 @@ html
     width:100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    background:rgba(32, 32, 32, 255);
+
 }
 
 #inspector p {
@@ -76,7 +81,7 @@ html
     width: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    background:rgba(32, 32, 32, 255);
+
 }
 
 #controls {
@@ -84,7 +89,7 @@ html
     width:100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    background:rgba(32, 32, 32, 255);
+
 }
 
 #controls div.pass{
@@ -94,7 +99,6 @@ html
 }
 
 #controls div section {
-    
     padding-top: 0.5em;
     padding-bottom: 0.5em;
     
@@ -119,31 +123,61 @@ html
     padding: 0.2em;
 }
 
+#bottombar 
+{
+    width: 70%;
+    height: 25%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    opacity: 0;
+
+    position: fixed;
+    bottom: 0;
+    right: 0;
+}
+
+#console
+{
+    height: 100%;
+    width: 100%;
+    overflow-y:scroll;
+    background:rgba(40, 40, 40, 255);
+}
+
+/*
 #console 
 {
-    width: 69.5%;
+    width: 70%;
     height: 25%;
-    background:rgba(32, 32, 32, 255);
-    float: left;
+    background:rgba(64, 64, 64, 255);
     overflow-y: scroll;
     overflow-x: hidden;
     opacity: 0;
+
+    position: fixed;
+    bottom: 0;
+    right: 0;
 }
+*/
 
 #console p 
 {
     font-family: 'Courier New', Courier, monospace;
-    padding-left:0.5em;
+    font-size: 0.5em;
+    padding-left: 0.5em;
+    margin-bottom: 0.55em;
     color: white;
 }
 
-#consoleResize
+#resize
 {
-    width:69.5%;
-    height:4px;
-    background: #121212;
-    float: left;
+    width:100%;
+    height:8px;
+    background:rgba(32, 32, 32, 255);
+    z-index: 20;
     cursor:grabbing;
+    position: sticky;
+    top:0;
 }
 
 canvas 
@@ -151,8 +185,8 @@ canvas
     width: 100%;
     height: 100%;
     position: fixed;
-    left: 0;
-    background: #323232;
+    right: 0;
+    background: rgb(157, 157, 157);
 }
 
 p {
@@ -178,27 +212,22 @@ body
 
 #ui {
     position: absolute;
-    z-index: 10;
+    z-index: 8;
     color:rgba(0.0, 0.0, 0.0, 0.0);
-    top: 20px;  
+    top: 60px;  
     right: 20px;
     text-align: right;
+    pointer-events: none;
 }
 
 #ui p {
     color: rgb(255, 255, 255);
+    pointer-events: none;
 }
 
-#notes {
-    position: absolute;
-    z-index: 1;
-    color:rgba(0.0, 0.0, 0.0, 0.0);
-    bottom: 20px;  
-    left: 20px;
-}
-
-#notes p {
-    color: white;
+#ui p.substat {
+    color:#c4c4c4;
+    pointer-events: none;
 }
 
 #size {
@@ -212,19 +241,6 @@ body
 #size p {
     color: white;
     text-align: right;
-}
-
-#loading {
-    position: absolute;
-    top: 50%;
-    z-index: 1;
-    color:rgba(0.0, 0.0, 0.0, 0.0);
-    width: 100%;
-}
-
-#loading p {
-    color: white;
-    text-align: center;
 }
 
 ::-webkit-scrollbar {
@@ -289,4 +305,30 @@ textarea.shaderCode {
     width: 23em;
     height: 12em;
     margin-left: 10px;
+}
+
+#splash {
+    width: 100%;
+    height: 100%;
+    /*background: rgb(51, 51, 51);*/
+    background: rgb(157, 157, 157);
+    vertical-align:middle;
+    text-align: center;
+    position:absolute;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    pointer-events: none;
+    opacity: 0;
+}
+
+#splash h1 {
+    color: #FFFFFF;
+    font-weight:100;
+}
+
+#loading {
+    color: rgb(157, 157, 157);
 }

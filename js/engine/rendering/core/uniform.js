@@ -20,3 +20,12 @@ class UniformFloat extends Uniform
         this.value = value
     }
 }
+
+class UniformVec3 extends Uniform
+{
+    constructor(name, type, location)
+    {
+        super(name, type, location, false)
+        this.value = vec3(0.0, 0.0, 0.0)
+    }
+}

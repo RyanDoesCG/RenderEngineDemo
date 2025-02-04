@@ -16,7 +16,8 @@ class RenderSettings
     {
         var HTML = ""
         
-        HTML += "<div class=\"tabHeader\"><img src=\"images\\icons\\rs.png\" alt=\"\"><h2>Render Settings</h2></div>"
+        //HTML += "<div class=\"tabHeader\"><img src=\"images\\icons\\rs.png\" alt=\"\"><h2>Render Settings</h2></div>"
+        HTML += "<div class=\"tabHeader\"><h2>Render Settings</h2></div>"
     
         for (var i = 0; i < this.engine.rendering.passes.length; ++i)
         {
@@ -28,9 +29,7 @@ class RenderSettings
                 writeValueToCookie(pass.constructor.name + "Toggle", "checked")
                 toggleFromCookie = "checked"
             }
-    
-            pass.on = toggleFromCookie == "checked";
-    
+
             HTML += "<div class=\"pass\">"
             HTML += "    <h3>" + (pass.constructor.name) +  " <input type=\"checkbox\" id=\"" + pass.constructor.name + "Toggle\" " + toggleFromCookie + "></h3>"
             for (const [name, uniform] of pass.uniforms.entries())
