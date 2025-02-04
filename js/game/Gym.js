@@ -39,7 +39,15 @@ class Gym extends Scene
                     {
                         \"position\":[0, -6.938893903907228e-16, 0],
                         \"rotation\":[0,0,0],
-                        \"scale\":[100,1,100]
+                        \"scale\":[10000,1,1000]
+                    }
+                ],
+                [
+                    \"Grass\",
+                    {
+                        \"position\":[0,1,0],
+                        \"rotation\":[0,0,0],
+                        \"scale\":[0.025,0.2,0.025]
                     }
                 ],
                 [
