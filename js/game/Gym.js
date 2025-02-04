@@ -3,17 +3,17 @@ class Gym extends Scene
     constructor(engine)
     {
         super(engine)
-
+        this.types.set("FirstPersonPlayer", (engine, transform) => { return new FirstPersonPlayer(engine, transform) })
         this.begin (engine)
     }
 
     begin (engine)
     {
-        if (cookieContains("scene"))
-        {
-            this.load()
-        }
-        else
+      //  if (cookieContains("scene"))
+      //  {
+      //      this.load()
+      //  }
+      //  else
         {
             this.spawn
             (`
@@ -39,7 +39,7 @@ class Gym extends Scene
                     {
                         \"position\":[0, -6.938893903907228e-16, 0],
                         \"rotation\":[0,0,0],
-                        \"scale\":[10,1,10]
+                        \"scale\":[100,1,100]
                     }
                 ],
                 [
@@ -71,6 +71,14 @@ class Gym extends Scene
                     {
                         \"position\":[-3.399998188018799, 4.0, -1.3411044719191523e-8],
                         \"rotation\":[0, 0.2900000810623169, 0],
+                        \"scale\":[1, 1, 1]
+                    }
+                ],
+                [
+                    \"FirstPersonPlayer\",
+                    {
+                        \"position\":[ 0.0, 6.0, 4.0 ],
+                        \"rotation\":[ 0.0, 0.0, 0.0 ],
                         \"scale\":[1, 1, 1]
                     }
                 ]
